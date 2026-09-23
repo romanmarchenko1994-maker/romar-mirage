@@ -1,0 +1,16 @@
+{
+  "name": "romar-mirage",
+  "version": "1.0.0",
+  "description": "RoMaR MiRaGe",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.3",
+    "express": "^5.1.0",
+    "express-session": "^1.19.0",
+    "pg": "^8.23.0"
+  }
+}

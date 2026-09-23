@@ -1,0 +1,432 @@
+/* Основные настройки страницы */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+
+    background-image:
+        linear-gradient(
+            rgba(3, 10, 12, 0.45),
+            rgba(3, 10, 12, 0.65)
+        ),
+        url("../images/forest-bg.png");
+
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+
+    color: #e8dcc4;
+    font-family: Georgia, "Times New Roman", serif;
+    overflow-x: hidden;
+}
+
+
+/* Шапка */
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 5px 50px;
+
+    border-bottom: 1px solid rgba(201, 165, 100, 0.25);
+    background: rgba(3, 8, 10, 0.65);
+}
+
+
+/* Логотип */
+
+.logo {
+    display: flex;
+    align-items: center;
+    transform: translateX(-30px);
+}
+
+.logo img {
+    display: block;
+    width: 350px;
+    height: auto;
+}
+
+
+/* Навигация */
+
+.main-navigation,
+.user-navigation {
+    display: flex;
+    gap: 25px;
+}
+
+a {
+    color: #e8dcc4;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #d9ad62;
+}
+
+
+/* Приветственный блок */
+
+.welcome {
+    text-align: center;
+    padding: 30px 20px 30px;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.welcome h1 {
+    margin: 0 0 15px;
+
+    font-size: 52px;
+    font-weight: normal;
+}
+
+.welcome p {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 25px;
+    font-style: italic;
+    color: #f0e4ce;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+     transform: scale(1.12);
+}
+
+
+/* Две основные области */
+
+.content-sections {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Истории */
+
+.stories-section {
+    min-height: auto;
+    padding: 35px 20px;
+    background: rgba(10, 17, 18, 0.72);
+    border: 1px solid rgba(201, 165, 100, 0.25);
+    border-radius: 8px;
+    border-top: 3px solid #b99a65;
+}
+
+.stories-section h2 {
+    margin: 0 0 8px;
+    min-height: 74px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 32px;
+    line-height: 1.15;
+    font-weight: normal;
+    color: #e0c48d;
+    text-shadow: 0 2px 7px rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: center;
+}
+
+.stories-section p {
+    margin: 0 0 8px;
+    min-height: 34px;
+}
+
+/* Категории */
+
+.categories {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 30px;
+}
+
+.category {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 175px;
+    width: fit-content;
+    padding: 20px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: hidden;
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.category span:last-child {
+    font-size: 19px;
+    letter-spacing: 0.3px;
+}
+
+
+/* Изображения категорий */
+
+.category img {
+    display: block;
+    width: 115px;
+    height: 115px;
+    object-fit: contain;
+    margin-bottom: 15px;
+}
+
+.stories-section .category img {
+    height: 105px;
+    width: auto;
+    object-fit: contain;
+}
+
+.stories-section .category {
+    min-height: auto;
+    padding: 10px;
+}
+
+.stories-section h2 {
+    min-height: auto;
+    margin-bottom: 10px;
+}
+
+.stories-section .categories {
+    margin-top: 0;
+}
+
+.account-link {
+    margin-left: auto;
+    color: #e8dcc4;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* Страница регистрации */
+
+.register-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.register-box {
+    width: 420px;
+    padding: 40px;
+    background: rgba(5, 12, 14, 0.85);
+    border: 1px solid rgba(201, 165, 100, 0.55);
+    border-radius: 8px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+}
+
+.register-box h1 {
+    margin: 0 0 30px;
+    text-align: center;
+    color: #e0c48d;
+    font-size: 36px;
+    font-weight: normal;
+}
+
+.register-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.register-box label {
+    color: #e8dcc4;
+    font-size: 17px;
+}
+
+.register-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    margin-bottom: 8px;
+
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(201, 165, 100, 0.4);
+    border-radius: 4px;
+
+    color: #f0e4ce;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+}
+
+.register-box input:focus {
+    outline: none;
+    border-color: #c9a564;
+}
+
+.register-box button {
+    margin-top: 15px;
+    padding: 12px;
+
+    background: rgba(120, 80, 30, 0.75);
+    border: 1px solid #c9a564;
+    border-radius: 4px;
+
+    color: #f0e4ce;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 17px;
+
+    cursor: pointer;
+}
+
+.register-box button:hover {
+    background: rgba(160, 110, 45, 0.85);
+}
+
+.account-area {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.account-link {
+    color: #e8dcc4;
+    font-size: 18px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.account-link:hover {
+    color: #c9a564;
+}
+
+#logout-button {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid rgba(201, 165, 100, 0.55);
+    border-radius: 4px;
+    color: #e8dcc4;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#logout-button:hover {
+    background: rgba(120, 80, 30, 0.45);
+    border-color: #c9a564;
+    color: #f0e4ce;
+}
+
+#account-link {
+    display: inline-block;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==============================
+   НОВОСТИ
+   ============================== */
+
+.news-page {
+    width: min(900px, calc(100% - 40px));
+    margin: 50px auto;
+    padding: 35px;
+    box-sizing: border-box;
+    background: rgba(5, 12, 14, 0.82);
+    border: 1px solid rgba(201, 165, 100, 0.45);
+    border-radius: 8px;
+}
+
+.news-page h1 {
+    margin: 0 0 30px;
+    text-align: center;
+    color: #e0c48d;
+    font-size: 36px;
+    font-weight: normal;
+}
+
+.news-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.news-form textarea {
+    flex: 1;
+    min-height: 70px;
+    padding: 12px;
+    box-sizing: border-box;
+    resize: vertical;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(201, 165, 100, 0.4);
+    border-radius: 4px;
+    color: #f0e4ce;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+}
+
+.news-form textarea:focus {
+    outline: none;
+    border-color: #c9a564;
+}
+
+.news-form button {
+    align-self: flex-end;
+    padding: 11px 18px;
+    background: rgba(120, 80, 30, 0.75);
+    border: 1px solid #c9a564;
+    border-radius: 4px;
+    color: #f0e4ce;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.news-form button:hover {
+    background: rgba(160, 110, 45, 0.85);
+}
+
+.news-item {
+    padding: 18px 0;
+    border-top: 1px solid rgba(201, 165, 100, 0.25);
+}
+
+.news-item p {
+    margin: 0 0 8px;
+    color: #e8dcc4;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.news-item time {
+    color: rgba(232, 220, 196, 0.65);
+    font-size: 14px;
+}
+
+.home-button {
+    display: block;
+    width: fit-content;
+    margin: 30px auto 0;
+    padding: 10px 18px;
+    background: rgba(120, 80, 30, 0.75);
+    border: 1px solid #c9a564;
+    border-radius: 4px;
+    color: #f0e4ce;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.home-button:hover {
+    background: rgba(160, 110, 45, 0.85);
+}
