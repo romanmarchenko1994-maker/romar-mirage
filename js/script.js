@@ -58,6 +58,8 @@ if (registerForm) {
 
             registerForm.reset();
 
+            window.location.href = "index.html";
+
         } catch (error) {
             message.textContent = "Не удалось подключиться к серверу.";
         }
