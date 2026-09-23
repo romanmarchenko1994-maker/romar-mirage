@@ -7,7 +7,7 @@ const { Client } = require("pg");
 const session = require("express-session");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const db = new Client({
     host: process.env.DB_HOST,
@@ -278,6 +278,6 @@ app.post("/api/news", async function (req, res) {
     }
 });
 
-app.listen(PORT, function () {
+app.listen(PORT, "0.0.0.0", function () {
     console.log(`Сайт запущен: http://localhost:${PORT}`);
 });
