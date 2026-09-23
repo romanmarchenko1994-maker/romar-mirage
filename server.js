@@ -56,15 +56,23 @@ app.post("/api/register", async function (req, res) {
 
         const passwordHash = await bcrypt.hash(password, 10);
 
-        await db.query(
+        const result = await db.query(
             `INSERT INTO users (username, email, password_hash)
-             VALUES ($1, $2, $3)`,
+             VALUES ($1, $2, $3)
+             RETURNING id, username, email`,
             [username, email, passwordHash]
         );
+
+        const user = result.rows[0];
+
+        req.session.userId = user.id;
+        req.session.username = user.username;
+        req.session.email = user.email;
 
         res.json({
             message: "Регистрация успешна."
         });
+
 
     } catch (error) {
         if (error.code === "23505") {
