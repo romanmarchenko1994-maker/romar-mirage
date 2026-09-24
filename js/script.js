@@ -79,6 +79,7 @@ if (loginForm) {
         const email = document.getElementById("login-email").value.trim();
         const password = document.getElementById("login-password").value;
         const message = document.getElementById("login-message");
+        
 
         if (email === "" || password === "") {
             message.textContent = "Введите Email и пароль.";
@@ -197,6 +198,15 @@ if (logoutButton) {
 const newsText = document.getElementById("news-text");
 const addNewsButton = document.getElementById("add-news");
 const newsList = document.getElementById("news-list");
+const newsForm = document.querySelector(".news-form");
+
+fetch("/api/me")
+    .then(response => response.json())
+    .then(user => {
+        if (newsForm && !user.isAdmin) {
+            newsForm.style.display = "none";
+        }
+    });
 
 if (newsText && addNewsButton && newsList) {
 

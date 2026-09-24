@@ -180,7 +180,8 @@ app.get("/api/me", async function (req, res) {
         res.json({
             loggedIn: true,
             username: user.username,
-            email: user.email
+            email: user.email,
+            isAdmin: user.email === process.env.ADMIN_EMAIL
         });
 
     } catch (error) {
