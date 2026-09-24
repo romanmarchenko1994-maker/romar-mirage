@@ -503,6 +503,58 @@ app.get("/api/scrolls/:slug/stories", async function (req, res) {
 });
 
 // ==============================
+// ОТДЕЛЬНАЯ ИСТОРИЯ
+// ==============================
+
+app.get("/api/stories/:id", async function (req, res) {
+    try {
+        const storyId = Number(req.params.id);
+
+        if (!Number.isInteger(storyId)) {
+            return res.status(400).json({
+                message: "Некорректный ID истории."
+            });
+        }
+
+        const storyResult = await db.query(
+            `SELECT id, title, cover_image, created_at
+             FROM stories
+             WHERE id = $1`,
+            [storyId]
+        );
+
+        if (storyResult.rows.length === 0) {
+            return res.status(404).json({
+                message: "История не найдена."
+            });
+        }
+
+        const imagesResult = await db.query(
+            `SELECT id, image_url, sort_order
+             FROM story_images
+             WHERE story_id = $1
+             ORDER BY sort_order ASC`,
+            [storyId]
+        );
+
+        res.json({
+            id: storyResult.rows[0].id,
+            title: storyResult.rows[0].title,
+            cover_image: storyResult.rows[0].cover_image,
+            created_at: storyResult.rows[0].created_at,
+            images: imagesResult.rows
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось загрузить историю."
+        });
+    }
+});
+
+// ==============================
 // IMAGEKIT АВТОРИЗАЦИЯ
 // ==============================
 

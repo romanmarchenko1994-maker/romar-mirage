@@ -399,7 +399,7 @@ if (storiesList) {
             stories.forEach(function (story) {
                 const card = document.createElement("a");
                 card.className = "story-card";
-                card.href = "/reader";
+                card.href = `/reader?id=${story.id}`;
 
                 const image = document.createElement("img");
                 image.src = story.cover_image;
@@ -620,9 +620,7 @@ if (
             storyUploadMessage.textContent =
                 "История успешно добавлена.";
 
-            if (typeof loadStories === "function") {
-                await loadStories();
-            }
+            window.location.reload();
 
         } catch (error) {
             console.error("Ошибка добавления истории:", error);
