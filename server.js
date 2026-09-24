@@ -5,6 +5,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const { Client } = require("pg");
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -87,9 +88,22 @@ app.use(function (req, res, next) {
 app.use(express.static(path.join(__dirname)));
 
 app.use(session({
+    store: new pgSession({
+        conObject: {
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            database: process.env.DB_NAME,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD
+        },
+        createTableIfMissing: true
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000
+    }
 }));
 
 
