@@ -202,16 +202,6 @@ const newsForm = document.querySelector(".news-form");
 
 let isAdmin = false;
 
-fetch("/api/me")
-    .then(response => response.json())
-    .then(user => {
-        isAdmin = user.isAdmin === true;
-
-        if (newsForm && !isAdmin) {
-            newsForm.style.display = "none";
-        }
-    });
-
 if (newsText && addNewsButton && newsList) {
 
     function showNews(news) {
@@ -225,88 +215,84 @@ if (newsText && addNewsButton && newsList) {
             text.textContent = item.text;
 
             const date = document.createElement("time");
-
             const createdDate = new Date(item.created_at);
-
             date.textContent = createdDate.toLocaleDateString("ru-RU");
 
             article.appendChild(text);
             article.appendChild(date);
 
-if (isAdmin) {
-    const editButton = document.createElement("button");
-    editButton.textContent = "Изменить";
-    editButton.type = "button";
+            if (isAdmin) {
+                const editButton = document.createElement("button");
+                editButton.textContent = "Изменить";
+                editButton.type = "button";
 
-    editButton.addEventListener("click", async function () {
-        const newText = prompt("Изменить новость:", item.text);
+                editButton.addEventListener("click", async function () {
+                    const newText = prompt("Изменить новость:", item.text);
 
-        if (newText === null || newText.trim() === "") {
-            return;
-        }
+                    if (newText === null || newText.trim() === "") {
+                        return;
+                    }
 
-        try {
-            const response = await fetch(`/api/news/${item.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    text: newText
-                })
-            });
+                    try {
+                        const response = await fetch(`/api/news/${item.id}`, {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                text: newText
+                            })
+                        });
 
-            const result = await response.json();
+                        const result = await response.json();
 
-            if (!response.ok) {
-                alert(result.message);
-                return;
+                        if (!response.ok) {
+                            alert(result.message);
+                            return;
+                        }
+
+                        await loadNews();
+
+                    } catch (error) {
+                        alert("Не удалось подключиться к серверу.");
+                    }
+                });
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Удалить";
+                deleteButton.type = "button";
+
+                deleteButton.addEventListener("click", async function () {
+                    if (!confirm("Удалить эту новость?")) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/news/${item.id}`, {
+                            method: "DELETE"
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            alert(result.message);
+                            return;
+                        }
+
+                        await loadNews();
+
+                    } catch (error) {
+                        alert("Не удалось подключиться к серверу.");
+                    }
+                });
+
+                article.appendChild(editButton);
+                article.appendChild(deleteButton);
             }
-
-            loadNews();
-
-        } catch (error) {
-            alert("Не удалось подключиться к серверу.");
-        }
-    });
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Удалить";
-    deleteButton.type = "button";
-
-    deleteButton.addEventListener("click", async function () {
-        if (!confirm("Удалить эту новость?")) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/news/${item.id}`, {
-                method: "DELETE"
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                alert(result.message);
-                return;
-            }
-
-            loadNews();
-
-        } catch (error) {
-            alert("Не удалось подключиться к серверу.");
-        }
-    });
-
-    article.appendChild(editButton);
-    article.appendChild(deleteButton);
-}    
-        
 
             newsList.appendChild(article);
         });
     }
-
 
     async function loadNews() {
         try {
@@ -314,6 +300,7 @@ if (isAdmin) {
             const news = await response.json();
 
             if (!response.ok) {
+                alert(news.message || "Не удалось загрузить новости.");
                 return;
             }
 
@@ -323,7 +310,6 @@ if (isAdmin) {
             console.error("Ошибка загрузки новостей:", error);
         }
     }
-
 
     addNewsButton.addEventListener("click", async function () {
         const text = newsText.value.trim();
@@ -352,13 +338,30 @@ if (isAdmin) {
 
             newsText.value = "";
 
-            loadNews();
+            await loadNews();
 
         } catch (error) {
             alert("Не удалось подключиться к серверу.");
         }
     });
 
+    async function initNews() {
+        try {
+            const response = await fetch("/api/me");
+            const user = await response.json();
 
-    loadNews();
+            isAdmin = user.isAdmin === true;
+
+            if (newsForm && !isAdmin) {
+                newsForm.style.display = "none";
+            }
+
+            await loadNews();
+
+        } catch (error) {
+            console.error("Ошибка проверки прав администратора:", error);
+        }
+    }
+
+    initNews();
 }
