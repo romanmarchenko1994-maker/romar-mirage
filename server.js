@@ -287,6 +287,113 @@ app.post("/api/news", async function (req, res) {
     }
 });
 
+app.put("/api/news/:id", async function (req, res) {
+    try {
+        if (!req.session.userId) {
+            return res.status(403).json({
+                message: "Изменять новости может только администратор."
+            });
+        }
+
+        const userResult = await db.query(
+            `SELECT email
+             FROM users
+             WHERE id = $1`,
+            [req.session.userId]
+        );
+
+        if (
+            userResult.rows.length === 0 ||
+            userResult.rows[0].email !== process.env.ADMIN_EMAIL
+        ) {
+            return res.status(403).json({
+                message: "Изменять новости может только администратор."
+            });
+        }
+
+        const { text } = req.body;
+
+        if (!text || text.trim() === "") {
+            return res.status(400).json({
+                message: "Введите текст новости."
+            });
+        }
+
+        const result = await db.query(
+            `UPDATE news
+             SET text = $1
+             WHERE id = $2
+             RETURNING id, text, created_at`,
+            [text.trim(), req.params.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: "Новость не найдена."
+            });
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось изменить новость."
+        });
+    }
+});
+
+app.delete("/api/news/:id", async function (req, res) {
+    try {
+        if (!req.session.userId) {
+            return res.status(403).json({
+                message: "Удалять новости может только администратор."
+            });
+        }
+
+        const userResult = await db.query(
+            `SELECT email
+             FROM users
+             WHERE id = $1`,
+            [req.session.userId]
+        );
+
+        if (
+            userResult.rows.length === 0 ||
+            userResult.rows[0].email !== process.env.ADMIN_EMAIL
+        ) {
+            return res.status(403).json({
+                message: "Удалять новости может только администратор."
+            });
+        }
+
+        const result = await db.query(
+            `DELETE FROM news
+             WHERE id = $1
+             RETURNING id`,
+            [req.params.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: "Новость не найдена."
+            });
+        }
+
+        res.json({
+            message: "Новость удалена."
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось удалить новость."
+        });
+    }
+});
+
 app.listen(PORT, "0.0.0.0", function () {
     console.log(`Сайт запущен: http://localhost:${PORT}`);
 });

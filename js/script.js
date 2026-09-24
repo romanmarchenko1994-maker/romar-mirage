@@ -200,10 +200,14 @@ const addNewsButton = document.getElementById("add-news");
 const newsList = document.getElementById("news-list");
 const newsForm = document.querySelector(".news-form");
 
+let isAdmin = false;
+
 fetch("/api/me")
     .then(response => response.json())
     .then(user => {
-        if (newsForm && !user.isAdmin) {
+        isAdmin = user.isAdmin === true;
+
+        if (newsForm && !isAdmin) {
             newsForm.style.display = "none";
         }
     });
@@ -228,6 +232,76 @@ if (newsText && addNewsButton && newsList) {
 
             article.appendChild(text);
             article.appendChild(date);
+
+if (isAdmin) {
+    const editButton = document.createElement("button");
+    editButton.textContent = "Изменить";
+    editButton.type = "button";
+
+    editButton.addEventListener("click", async function () {
+        const newText = prompt("Изменить новость:", item.text);
+
+        if (newText === null || newText.trim() === "") {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/news/${item.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    text: newText
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message);
+                return;
+            }
+
+            loadNews();
+
+        } catch (error) {
+            alert("Не удалось подключиться к серверу.");
+        }
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Удалить";
+    deleteButton.type = "button";
+
+    deleteButton.addEventListener("click", async function () {
+        if (!confirm("Удалить эту новость?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/news/${item.id}`, {
+                method: "DELETE"
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message);
+                return;
+            }
+
+            loadNews();
+
+        } catch (error) {
+            alert("Не удалось подключиться к серверу.");
+        }
+    });
+
+    article.appendChild(editButton);
+    article.appendChild(deleteButton);
+}    
+        
 
             newsList.appendChild(article);
         });
