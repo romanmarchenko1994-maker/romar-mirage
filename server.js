@@ -26,7 +26,66 @@ db.connect()
     });
 
 app.use(express.json());
+
+
+// ==============================
+// КРАСИВЫЕ АДРЕСА СТРАНИЦ
+// ==============================
+
+app.use(function (req, res, next) {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        return next();
+    }
+
+    if (req.path.startsWith("/api/")) {
+        return next();
+    }
+
+    // index.html → /
+    if (req.path === "/index.html") {
+        return res.redirect(301, "/");
+    }
+
+    // news.html → /news
+    // login.html → /login
+    // register.html → /register
+    if (req.path.endsWith(".html")) {
+        const cleanPath = req.path.slice(0, -5) || "/";
+        return res.redirect(301, cleanPath);
+    }
+
+    // CSS, JS, изображения и прочие реальные файлы
+    // передаём дальше обычному static
+    if (path.extname(req.path) || req.path.endsWith("/")) {
+        return next();
+    }
+
+    // /news → news.html
+    // /login → login.html
+    // /register → register.html
+    // /about → about.html
+    const relativePage = req.path === "/"
+        ? "index.html"
+        : `${req.path.replace(/^\/+/, "")}.html`;
+
+    const rootPath = path.resolve(__dirname);
+    const filePath = path.resolve(rootPath, relativePage);
+
+    // Защита от выхода за пределы папки сайта
+    if (!filePath.startsWith(rootPath + path.sep)) {
+        return next();
+    }
+
+    res.sendFile(filePath, function (error) {
+        if (error) {
+            next();
+        }
+    });
+});
+
+
 app.use(express.static(path.join(__dirname)));
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -73,7 +132,6 @@ app.post("/api/register", async function (req, res) {
             message: "Регистрация успешна."
         });
 
-
     } catch (error) {
         if (error.code === "23505") {
             return res.status(400).json({
@@ -88,7 +146,6 @@ app.post("/api/register", async function (req, res) {
         });
     }
 });
-
 
 
 // ==============================
@@ -148,6 +205,7 @@ app.post("/api/login", async function (req, res) {
     }
 });
 
+
 // ==============================
 // ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ
 // ==============================
@@ -193,6 +251,7 @@ app.get("/api/me", async function (req, res) {
     }
 });
 
+
 // ==============================
 // ВЫХОД
 // ==============================
@@ -212,6 +271,7 @@ app.post("/api/logout", function (req, res) {
         });
     });
 });
+
 
 // ==============================
 // НОВОСТИ
@@ -272,7 +332,7 @@ app.post("/api/news", async function (req, res) {
         const result = await db.query(
             `INSERT INTO news (text)
              VALUES ($1)
-              RETURNING id, text, created_at`,
+             RETURNING id, text, created_at`,
             [text.trim()]
         );
 
@@ -286,6 +346,7 @@ app.post("/api/news", async function (req, res) {
         });
     }
 });
+
 
 app.put("/api/news/:id", async function (req, res) {
     try {
@@ -344,6 +405,7 @@ app.put("/api/news/:id", async function (req, res) {
     }
 });
 
+
 app.delete("/api/news/:id", async function (req, res) {
     try {
         if (!req.session.userId) {
@@ -393,6 +455,7 @@ app.delete("/api/news/:id", async function (req, res) {
         });
     }
 });
+
 
 app.listen(PORT, "0.0.0.0", function () {
     console.log(`Сайт запущен: http://localhost:${PORT}`);
