@@ -776,3 +776,50 @@ a:hover {
     text-align: center;
     color: #d8cbb4;
 }
+
+/* ==============================
+   КАРТОЧКА И УДАЛЕНИЕ ИСТОРИИ
+   ============================== */
+
+.story-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 100%;
+}
+
+.story-card-wrapper .story-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.story-delete-button {
+    margin-top: 8px;
+    padding: 6px 12px;
+
+    background: transparent;
+    border: 1px solid rgba(160, 90, 70, 0.65);
+    border-radius: 4px;
+
+    color: #d8cbb4;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.story-delete-button:hover {
+    background: rgba(110, 55, 40, 0.45);
+    border-color: #b98a70;
+}
+
+.story-delete-button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}

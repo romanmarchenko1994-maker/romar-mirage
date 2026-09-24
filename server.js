@@ -730,18 +730,22 @@ app.post("/api/stories/:id/images", async function (req, res) {
                 if (
                     !image ||
                     typeof image.url !== "string" ||
+                    typeof image.fileId !== "string" ||
                     !Number.isInteger(image.sortOrder)
                 ) {
-                    throw new Error("Некорректные данные изображения.");
+                    throw new Error(
+                        "Некорректные данные изображения."
+                    );
                 }
 
                 await db.query(
                     `INSERT INTO story_images
-                     (story_id, image_url, sort_order)
-                     VALUES ($1, $2, $3)`,
+                     (story_id, image_url, file_id, sort_order)
+                     VALUES ($1, $2, $3, $4)`,
                     [
                         storyId,
                         image.url,
+                        image.fileId,
                         image.sortOrder
                     ]
                 );
@@ -773,6 +777,94 @@ app.post("/api/stories/:id/images", async function (req, res) {
 
         res.status(500).json({
             message: "Не удалось сохранить изображения истории."
+        });
+    }
+});
+
+// ==============================
+// УДАЛЕНИЕ ИСТОРИИ
+// ==============================
+
+app.delete("/api/stories/:id", async function (req, res) {
+    try {
+        if (!req.session.userId) {
+            return res.status(403).json({
+                message: "Удалять истории может только администратор."
+            });
+        }
+
+        const userResult = await db.query(
+            `SELECT email
+             FROM users
+             WHERE id = $1`,
+            [req.session.userId]
+        );
+
+        if (
+            userResult.rows.length === 0 ||
+            userResult.rows[0].email !== process.env.ADMIN_EMAIL
+        ) {
+            return res.status(403).json({
+                message: "Удалять истории может только администратор."
+            });
+        }
+
+        const storyId = Number(req.params.id);
+
+        if (!Number.isInteger(storyId)) {
+            return res.status(400).json({
+                message: "Некорректный ID истории."
+            });
+        }
+
+        const storyResult = await db.query(
+            `SELECT id, title
+             FROM stories
+             WHERE id = $1`,
+            [storyId]
+        );
+
+        if (storyResult.rows.length === 0) {
+            return res.status(404).json({
+                message: "История не найдена."
+            });
+        }
+
+        const imagesResult = await db.query(
+            `SELECT file_id
+             FROM story_images
+             WHERE story_id = $1
+             AND file_id IS NOT NULL`,
+            [storyId]
+        );
+
+        for (const image of imagesResult.rows) {
+            try {
+                await imagekit.files.delete(image.file_id);
+            } catch (error) {
+                console.error(
+                    `Не удалось удалить файл ImageKit ${image.file_id}:`,
+                    error
+                );
+            }
+        }
+
+        await db.query(
+            `DELETE FROM stories
+             WHERE id = $1`,
+            [storyId]
+        );
+
+        res.json({
+            message: "История удалена.",
+            title: storyResult.rows[0].title
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось удалить историю."
         });
     }
 });

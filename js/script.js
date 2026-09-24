@@ -374,13 +374,25 @@ if (newsText && addNewsButton && newsList) {
 const storiesList = document.getElementById("stories-list");
 
 if (storiesList) {
+
     async function loadStories() {
         try {
-            const response = await fetch("/api/scrolls/shadows/stories");
+            const userResponse = await fetch("/api/me");
+            const user = await userResponse.json();
+
+            isAdmin = user.isAdmin === true;
+
+            const response = await fetch(
+                "/api/scrolls/shadows/stories"
+            );
+
             const stories = await response.json();
 
             if (!response.ok) {
-                console.error("Ошибка загрузки историй:", stories.message);
+                console.error(
+                    "Ошибка загрузки историй:",
+                    stories.message
+                );
                 return;
             }
 
@@ -397,27 +409,147 @@ if (storiesList) {
             }
 
             stories.forEach(function (story) {
-                const card = document.createElement("a");
-                card.className = "story-card";
-                card.href = `/reader?id=${story.id}`;
 
-                const image = document.createElement("img");
-                image.src = story.cover_image;
-                image.alt = story.title;
+                const wrapper =
+                    document.createElement("div");
 
-                const title = document.createElement("h2");
-                title.textContent = story.title;
+                wrapper.className =
+                    "story-card-wrapper";
+
+
+                const card =
+                    document.createElement("a");
+
+                card.className =
+                    "story-card";
+
+                card.href =
+                    `/reader?id=${story.id}`;
+
+
+                const image =
+                    document.createElement("img");
+
+                image.src =
+                    story.cover_image;
+
+                image.alt =
+                    story.title;
+
+
+                const title =
+                    document.createElement("h2");
+
+                title.textContent =
+                    story.title;
+
 
                 card.appendChild(image);
                 card.appendChild(title);
 
-                storiesList.appendChild(card);
+                wrapper.appendChild(card);
+
+
+                if (isAdmin) {
+
+                    const deleteButton =
+                        document.createElement("button");
+
+                    deleteButton.textContent =
+                        "Удалить";
+
+                    deleteButton.type =
+                        "button";
+
+                    deleteButton.className =
+                        "story-delete-button";
+
+
+                    deleteButton.addEventListener(
+                        "click",
+                        async function (event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
+
+
+                            const confirmed = confirm(
+                                `Удалить историю «${story.title}»?\n\n` +
+                                "История и её изображения будут удалены."
+                            );
+
+
+                            if (!confirmed) {
+                                return;
+                            }
+
+
+                            try {
+
+                                deleteButton.disabled = true;
+
+                                const response =
+                                    await fetch(
+                                        `/api/stories/${story.id}`,
+                                        {
+                                            method: "DELETE"
+                                        }
+                                    );
+
+
+                                const result =
+                                    await response.json();
+
+
+                                if (!response.ok) {
+                                    alert(
+                                        result.message ||
+                                        "Не удалось удалить историю."
+                                    );
+
+                                    deleteButton.disabled = false;
+
+                                    return;
+                                }
+
+
+                                window.location.reload();
+
+
+                            } catch (error) {
+
+                                console.error(
+                                    "Ошибка удаления истории:",
+                                    error
+                                );
+
+                                alert(
+                                    "Не удалось подключиться к серверу."
+                                );
+
+                                deleteButton.disabled = false;
+                            }
+
+                        }
+                    );
+
+
+                    wrapper.appendChild(deleteButton);
+                }
+
+
+                storiesList.appendChild(wrapper);
             });
 
         } catch (error) {
-            console.error("Ошибка загрузки историй:", error);
+
+            console.error(
+                "Ошибка загрузки историй:",
+                error
+            );
         }
     }
+
 
     loadStories();
 }
@@ -479,44 +611,48 @@ if (
     }
 
     async function uploadFileToImageKit(file, storyId, sortOrder) {
-        const auth = await getImageKitAuth();
+    const auth = await getImageKitAuth();
 
-        const formData = new FormData();
+    const formData = new FormData();
 
-        formData.append("file", file);
-        formData.append("fileName", file.name);
-        formData.append("publicKey", auth.publicKey);
-        formData.append("signature", auth.signature);
-        formData.append("expire", auth.expire);
-        formData.append("token", auth.token);
-        formData.append(
-            "folder",
-            `/romar-mirage/stories/${storyId}`
-        );
-        formData.append("useUniqueFileName", "false");
-        formData.append("overwriteFile", "true");
+    formData.append("file", file);
+    formData.append("fileName", file.name);
+    formData.append("publicKey", auth.publicKey);
+    formData.append("signature", auth.signature);
+    formData.append("expire", auth.expire);
+    formData.append("token", auth.token);
 
-        const response = await fetch(
-            "https://upload.imagekit.io/api/v1/files/upload",
-            {
-                method: "POST",
-                body: formData
-            }
-        );
+    formData.append(
+        "folder",
+        `/romar-mirage/stories/${storyId}`
+    );
 
-        const result = await response.json();
+    formData.append("useUniqueFileName", "false");
+    formData.append("overwriteFile", "true");
 
-        if (!response.ok) {
-            throw new Error(
-                result.message || "Не удалось загрузить изображение."
-            );
+    const response = await fetch(
+        "https://upload.imagekit.io/api/v1/files/upload",
+        {
+            method: "POST",
+            body: formData
         }
+    );
 
-        return {
-            url: result.url,
-            sortOrder: sortOrder
-        };
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result.message ||
+            "Не удалось загрузить изображение."
+        );
     }
+
+    return {
+        url: result.url,
+        fileId: result.fileId,
+        sortOrder: sortOrder
+    };
+}
 
     uploadStoryButton.addEventListener("click", async function () {
         const title = storyTitle.value.trim();
