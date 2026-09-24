@@ -365,3 +365,59 @@ if (newsText && addNewsButton && newsList) {
 
     initNews();
 }
+
+
+// ==============================
+// ИСТОРИИ СВИТКА
+// ==============================
+
+const storiesList = document.getElementById("stories-list");
+
+if (storiesList) {
+    async function loadStories() {
+        try {
+            const response = await fetch("/api/scrolls/shadows/stories");
+            const stories = await response.json();
+
+            if (!response.ok) {
+                console.error("Ошибка загрузки историй:", stories.message);
+                return;
+            }
+
+            storiesList.innerHTML = "";
+
+            if (stories.length === 0) {
+                storiesList.innerHTML = `
+                    <div class="stories-empty">
+                        <p>Истории пока не добавлены.</p>
+                    </div>
+                `;
+
+                return;
+            }
+
+            stories.forEach(function (story) {
+                const card = document.createElement("a");
+                card.className = "story-card";
+                card.href = "#";
+
+                const image = document.createElement("img");
+                image.src = story.cover_image;
+                image.alt = story.title;
+
+                const title = document.createElement("h2");
+                title.textContent = story.title;
+
+                card.appendChild(image);
+                card.appendChild(title);
+
+                storiesList.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error("Ошибка загрузки историй:", error);
+        }
+    }
+
+    loadStories();
+}

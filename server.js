@@ -471,6 +471,33 @@ app.delete("/api/news/:id", async function (req, res) {
 });
 
 
+// ==============================
+// ИСТОРИИ СВИТКА
+// ==============================
+
+app.get("/api/scrolls/:slug/stories", async function (req, res) {
+    try {
+        const result = await db.query(
+            `SELECT stories.id, stories.title, stories.cover_image, stories.created_at
+             FROM stories
+             JOIN scrolls
+             ON stories.scroll_id = scrolls.id
+             WHERE scrolls.slug = $1
+             ORDER BY stories.created_at ASC`,
+            [req.params.slug]
+        );
+
+        res.json(result.rows);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось загрузить истории."
+        });
+    }
+});
+
 app.listen(PORT, "0.0.0.0", function () {
     console.log(`Сайт запущен: http://localhost:${PORT}`);
 });
