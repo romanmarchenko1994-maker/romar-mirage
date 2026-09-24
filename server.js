@@ -5,10 +5,14 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const { Client } = require("pg");
 const session = require("express-session");
+const ImageKit = require("@imagekit/nodejs");
 const pgSession = require("connect-pg-simple")(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const imagekit = new ImageKit({
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY
+});
 
 const db = new Client({
     host: process.env.DB_HOST,
@@ -494,6 +498,229 @@ app.get("/api/scrolls/:slug/stories", async function (req, res) {
 
         res.status(500).json({
             message: "Не удалось загрузить истории."
+        });
+    }
+});
+
+// ==============================
+// IMAGEKIT АВТОРИЗАЦИЯ
+// ==============================
+
+app.get("/api/imagekit/auth", async function (req, res) {
+    try {
+        if (!req.session.userId) {
+            return res.status(403).json({
+                message: "Только администратор может загружать изображения."
+            });
+        }
+
+        const userResult = await db.query(
+            `SELECT email
+             FROM users
+             WHERE id = $1`,
+            [req.session.userId]
+        );
+
+        if (
+            userResult.rows.length === 0 ||
+            userResult.rows[0].email !== process.env.ADMIN_EMAIL
+        ) {
+            return res.status(403).json({
+                message: "Только администратор может загружать изображения."
+            });
+        }
+
+        const authParams =
+            imagekit.helper.getAuthenticationParameters();
+
+        res.json({
+            ...authParams,
+            publicKey: process.env.IMAGEKIT_PUBLIC_KEY
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось подготовить загрузку изображений."
+        });
+    }
+});
+
+// ==============================
+// ИСТОРИИ
+// ==============================
+
+app.post("/api/stories", async function (req, res) {
+    try {
+        if (!req.session.userId) {
+            return res.status(403).json({
+                message: "Добавлять истории может только администратор."
+            });
+        }
+
+        const userResult = await db.query(
+            `SELECT email
+             FROM users
+             WHERE id = $1`,
+            [req.session.userId]
+        );
+
+        if (
+            userResult.rows.length === 0 ||
+            userResult.rows[0].email !== process.env.ADMIN_EMAIL
+        ) {
+            return res.status(403).json({
+                message: "Добавлять истории может только администратор."
+            });
+        }
+
+        const { scrollSlug, title } = req.body;
+
+        if (!scrollSlug || !title || title.trim() === "") {
+            return res.status(400).json({
+                message: "Укажите свиток и название истории."
+            });
+        }
+
+        const scrollResult = await db.query(
+            `SELECT id
+             FROM scrolls
+             WHERE slug = $1`,
+            [scrollSlug]
+        );
+
+        if (scrollResult.rows.length === 0) {
+            return res.status(404).json({
+                message: "Свиток не найден."
+            });
+        }
+
+        const result = await db.query(
+            `INSERT INTO stories (scroll_id, title)
+             VALUES ($1, $2)
+             RETURNING id, scroll_id, title, cover_image, created_at`,
+            [
+                scrollResult.rows[0].id,
+                title.trim()
+            ]
+        );
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось создать историю."
+        });
+    }
+});
+
+
+app.post("/api/stories/:id/images", async function (req, res) {
+    try {
+        if (!req.session.userId) {
+            return res.status(403).json({
+                message: "Добавлять изображения может только администратор."
+            });
+        }
+
+        const userResult = await db.query(
+            `SELECT email
+             FROM users
+             WHERE id = $1`,
+            [req.session.userId]
+        );
+
+        if (
+            userResult.rows.length === 0 ||
+            userResult.rows[0].email !== process.env.ADMIN_EMAIL
+        ) {
+            return res.status(403).json({
+                message: "Добавлять изображения может только администратор."
+            });
+        }
+
+        const { images } = req.body;
+
+        if (!Array.isArray(images) || images.length === 0) {
+            return res.status(400).json({
+                message: "Изображения не переданы."
+            });
+        }
+
+        const storyId = Number(req.params.id);
+
+        if (!Number.isInteger(storyId)) {
+            return res.status(400).json({
+                message: "Некорректный ID истории."
+            });
+        }
+
+        const storyResult = await db.query(
+            `SELECT id
+             FROM stories
+             WHERE id = $1`,
+            [storyId]
+        );
+
+        if (storyResult.rows.length === 0) {
+            return res.status(404).json({
+                message: "История не найдена."
+            });
+        }
+
+        await db.query("BEGIN");
+
+        try {
+            for (const image of images) {
+                if (
+                    !image ||
+                    typeof image.url !== "string" ||
+                    !Number.isInteger(image.sortOrder)
+                ) {
+                    throw new Error("Некорректные данные изображения.");
+                }
+
+                await db.query(
+                    `INSERT INTO story_images
+                     (story_id, image_url, sort_order)
+                     VALUES ($1, $2, $3)`,
+                    [
+                        storyId,
+                        image.url,
+                        image.sortOrder
+                    ]
+                );
+            }
+
+            await db.query(
+                `UPDATE stories
+                 SET cover_image = $1
+                 WHERE id = $2`,
+                [
+                    images[0].url,
+                    storyId
+                ]
+            );
+
+            await db.query("COMMIT");
+
+        } catch (error) {
+            await db.query("ROLLBACK");
+            throw error;
+        }
+
+        res.json({
+            message: "Изображения истории сохранены."
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Не удалось сохранить изображения истории."
         });
     }
 });

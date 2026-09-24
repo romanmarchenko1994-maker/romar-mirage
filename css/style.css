@@ -547,13 +547,232 @@ a:hover {
     text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
 }
 
-.story-card p {
-    margin: 0;
+/* ==============================
+   ЧИТАЛКА
+   ============================== */
 
-    font-size: 14px;
-    line-height: 1.35;
+.reader-page {
+    width: 100%;
+    min-height: calc(100vh - 120px);
+    padding: 25px 20px 40px;
+    box-sizing: border-box;
+    text-align: center;
+}
 
+.reader-title {
+    margin: 0 0 18px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 32px;
+    font-weight: normal;
+
+    color: #e0c48d;
+    text-shadow: 0 2px 7px rgba(0, 0, 0, 0.9);
+}
+
+.reader {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1100px) 60px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    width: 100%;
+}
+
+.reader-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    min-height: 0;
+}
+
+#reader-image {
+    display: block;
+
+    max-width: 100%;
+    max-height: calc(100vh - 130px);
+
+    width: auto;
+    height: auto;
+
+    object-fit: contain;
+
+    border: 1px solid rgba(201, 165, 100, 0.35);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
+}
+
+.reader-button {
+    width: 60px;
+    height: 80px;
+
+    padding: 0;
+
+    background: rgba(10, 17, 18, 0.82);
+    border: 1px solid rgba(201, 165, 100, 0.45);
+    border-radius: 6px;
+
+    color: #e0c48d;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 36px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.reader-button:hover:not(:disabled) {
+    background: rgba(25, 30, 30, 0.95);
+    border-color: #c9a564;
+}
+
+.reader-button:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.reader-counter {
+    margin-top: 15px;
+
+    font-size: 18px;
+    color: #d8cbb4;
+}
+
+.reader-back {
+    display: inline-block;
+    margin-top: 18px;
+}
+
+@media (max-width: 700px) {
+    .reader {
+        grid-template-columns: 45px minmax(0, 1fr) 45px;
+        gap: 7px;
+    }
+
+    .reader-button {
+        width: 42px;
+        height: 65px;
+        font-size: 28px;
+    }
+
+    #reader-image {
+        max-height: calc(100vh - 220px);
+    }
+
+    .reader-title {
+        font-size: 26px;
+    }
+}
+
+/* ==============================
+   ДОБАВЛЕНИЕ ИСТОРИИ
+   ============================== */
+
+.story-admin {
+    display: none;
+
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 30px;
+    padding: 25px;
+
+    box-sizing: border-box;
+
+    background: rgba(10, 17, 18, 0.72);
+    border: 1px solid rgba(201, 165, 100, 0.25);
+    border-top: 3px solid #b99a65;
+    border-radius: 8px;
+}
+
+.story-admin h2 {
+    margin: 0 0 20px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 28px;
+    font-weight: normal;
     text-align: center;
 
+    color: #e0c48d;
+}
+
+.story-admin label {
+    display: block;
+    margin: 15px 0 7px;
+
+    font-size: 17px;
+    color: #d8cbb4;
+}
+
+.story-admin select,
+.story-admin input[type="text"],
+.story-admin input[type="file"] {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px;
+
+    background: rgba(5, 10, 11, 0.75);
+    border: 1px solid rgba(201, 165, 100, 0.35);
+    border-radius: 4px;
+
+    color: #e8dcc4;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+}
+
+.story-admin input[type="file"] {
+    padding: 8px;
+}
+
+#story-files {
+    margin-top: 12px;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: #bfb29d;
+}
+
+#upload-story {
+    display: block;
+
+    margin: 20px auto 0;
+    padding: 9px 18px;
+
+    background: transparent;
+    border: 1px solid rgba(201, 165, 100, 0.55);
+    border-radius: 4px;
+
+    color: #e8dcc4;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+#upload-story:hover {
+    background: rgba(120, 80, 30, 0.45);
+    border-color: #c9a564;
+    color: #f0e4ce;
+}
+
+#upload-story:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+#story-upload-message {
+    min-height: 20px;
+    margin: 15px 0 0;
+
+    text-align: center;
     color: #d8cbb4;
 }
